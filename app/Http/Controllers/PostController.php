@@ -1,0 +1,114 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Requests\StoreCommentRequest;
+use App\Models\Post;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
+use Inertia\Inertia;
+
+class PostController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function index()
+    {
+        $posts = Post::with('user')->latest()->get();
+
+        return Inertia::render('posts/Index', [
+            'posts' => $posts
+        ]);
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+        return Inertia::render('posts/Create', []);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(StorePostRequest $request)
+    {
+        $data = $request->validated();
+        $user = auth()->user();
+
+        // create a new post associated with the user
+        $user->posts()->create($data);
+    
+        // return redirect()->route('posts.index')->with('success', 'Post created successfully.');
+        return redirect()->route('posts.index')->with('message', 'Post created successfully.');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Post $post)
+    {
+        $post->load('user')->with('comments.user');
+        return Inertia::render('posts/Show', [
+            'post' => $post
+        ]);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Post $post)
+    {
+        $post->load('user');
+
+        $user = auth()->user();
+
+        // Only allow the article owner to delete
+        if (! $user || $user->id !== $post->user_id) {
+            abort(403);
+        }
+
+        return inertia('posts/Edit', [
+            'post' => $post
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(UpdatePostRequest $request, Post $post)
+    {
+        $user = auth()->user();
+
+        // Only allow the article owner to delete
+        if (! $user || $user->id !== $post->user_id) {
+            abort(403);
+        }
+
+        Post::where('id', $post->id)->update([
+            'content' => $request->validated()['content']
+        ]);
+
+        return redirect()->route('posts.show', $post)->with('message', 'Post updated successfully.');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Post $post)
+    {
+        //
+    }
+
+    
+    /**
+     * Store the new post's comment in storage.
+     */
+    public function comment(Post $post, StoreCommentRequest $request)
+    {
+        //
+    }
+}
