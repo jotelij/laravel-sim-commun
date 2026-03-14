@@ -15,7 +15,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('user')->latest()->get();
+        $posts = Post::with('user')->withCount('comments', 'reactions')->latest()->get();
 
         return Inertia::render('posts/Index', [
             'posts' => $posts
@@ -41,9 +41,19 @@ class PostController extends Controller
 
         // create a new post associated with the user
         $user->posts()->create($data);
+
+        // Success
+        session()->flash('alert', [
+            'type' => 'success',
+            'message' => 'Record created successfully!'
+        ]);
     
         // return redirect()->route('posts.index')->with('success', 'Post created successfully.');
-        return redirect()->route('posts.index')->with('message', 'Post created successfully.');
+        return redirect()->route('posts.index')->with(
+            'alert', [
+                'type' => 'success',
+                'message' => 'Record created successfully!'
+            ]);
     }
 
     /**
@@ -51,7 +61,8 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
-        $post->load('user')->with('comments.user');
+        $post->load('user', 'comments', 'comments.user')->loadCount('reactions', 'comments');
+        // dd($post);
         return Inertia::render('posts/Show', [
             'post' => $post
         ]);
@@ -109,6 +120,32 @@ class PostController extends Controller
      */
     public function comment(Post $post, StoreCommentRequest $request)
     {
-        //
+        $data = $request->validated();
+        $user = auth()->user();
+
+        // create a new comment associated with the post and user
+        $post->comments()->create(array_merge($data, ['user_id' => $user->id]));
+
+        // return redirect()->route('posts.index')->with('success', 'Post created successfully.');
+        return redirect()->route('posts.show', $post)->with('message', 'Comment created successfully.');
+    }
+
+     /**
+     * Display a listing of user post  resource.
+     */
+    public function my_index()
+    {
+        $user = auth()->user();
+
+        // Only allow the article owner to delete
+        if (!$user) {
+            abort(403);
+        }
+
+        $posts = $user->posts()->with('user')->withCount('comments', 'reactions')->latest()->get();
+
+        return Inertia::render('posts/MyIndex', [
+            'posts' => $posts
+        ]);
     }
 }

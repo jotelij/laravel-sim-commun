@@ -21,7 +21,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
     Route::put('posts/{post}', [PostController::class, 'update'])->name('posts.update');
     Route::delete('posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
-    Route::post('posts/{post}/comment', [PostController::class, 'comment'])->name('posts.comment');
+    Route::post('posts/{post}/comment', [PostController::class, 'comment'])->name('posts.comments.store');
+
+    //
+    // Route::get('user/{user}/posts', [PostController::class, 'user'])->name('user.posts.index');
+    Route::get('user/my_posts', [PostController::class, 'my_index'])->name('user.my_posts.index');
 });
 
 

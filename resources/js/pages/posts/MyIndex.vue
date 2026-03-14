@@ -6,7 +6,6 @@ import type { BreadcrumbItem } from '@/types';
 import posts from '@/routes/posts';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
-import {Alert,AlertTitle} from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Post } from '@/types/models';
 import { timeAgo } from '@/lib/utils';
@@ -19,8 +18,8 @@ const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Posts',
-        href: "/posts",
+        title: 'My Posts',
+        href: "user/my_posts",
     },
 ];
 
@@ -33,14 +32,6 @@ const page = usePage();
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-4">
-            <!-- show message -->
-            <!-- <div v-if="page.props.flash?.message" class="grid w-full max-w-xl items-start gap-4 m-b-4">
-                <!TODO: Move this to a global component and use it for flash messages when creating/updating/deleting posts.>
-                <Alert>
-                    <CheckCircle2Icon />
-                    <AlertTitle>{{ page.props.flash?.message }}</AlertTitle>
-                </Alert>
-            </div> -->
             <Link :href="posts.create()">
                 <Button>Create Post</Button>
             </Link>

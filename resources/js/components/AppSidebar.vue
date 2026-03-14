@@ -17,6 +17,7 @@ import {
 import { dashboard } from '@/routes';
 import type { NavItem } from '@/types';
 import posts from '@/routes/posts';
+import user from '@/routes/user';
 
 const mainNavItems: NavItem[] = [
     {
@@ -36,7 +37,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'My Posts',
-        href: dashboard(),
+        href: user.my_posts.index(),
         icon: Newspaper,
     },
 ];

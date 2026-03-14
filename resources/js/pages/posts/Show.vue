@@ -2,6 +2,7 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
+import { ThumbsUpIcon, MessageSquareText  } from 'lucide-vue-next';
 import {
   Field,
   FieldDescription,
@@ -17,20 +18,10 @@ import {
 } from "@/components/ui/input-group";
 import posts from '@/routes/posts';
 import { Button } from '@/components/ui/button';
+import { ButtonGroup } from '@/components/ui/button-group';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-
-
-interface User {
-    id: number;
-    name: string;
-}
-
-interface Post {
-    id: number;
-    content: string;
-    user: User;  
-    created_at: string;
-}
+import { Post } from '@/types/models';
+import { timeAgo } from '@/lib/utils';
 
 interface Props {
     post: Post;
@@ -42,9 +33,14 @@ const form = useForm({
     content: null,
 });
 
+const handleSubmit = () => {
+    form.post(posts.comments.store(props.post.id).url);
+    form.reset();
+}
+
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Posts',
+        title: 'Read Post',
         href: "/posts/{props.post.id}",
     },
 ];
@@ -56,31 +52,42 @@ const breadcrumbs: BreadcrumbItem[] = [
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="p-4">
-
             
             <Link :href="posts.edit(props.post.id)">
                 <Button>Edit Post</Button>
             </Link>
-
-            <div class="my-6 space-y-4">
-                <Card class="w-full max-w-xl">
-                    <CardHeader>
-                        <CardTitle>{{ props.post.user.name }}</CardTitle>
-                        <CardDescription>{{ new Date(props.post.created_at) }}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <p>{{ props.post.content }}</p>
-                    </CardContent>
-                    <CardFooter>
-                        <p></p>
-                    </CardFooter>
-                </Card>
+            
+            <!-- show the post in a card, with the user's name as the title, the created_at as the description, and the content as the content. Then show the comments below, with the same format but without the footer. -->
+            <div class="my-6 space-y-4 w-full max-w-xl">
+                <CardHeader>
+                    <CardTitle>{{ props.post.user.name }}</CardTitle>
+                    <CardDescription>{{ timeAgo(props.post.created_at) }}</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <p>{{ props.post.content }}</p>
+                </CardContent>
+                <CardFooter>
+                    <ButtonGroup>
+                        <ButtonGroup>
+                            <Button variant="outline">
+                                <ThumbsUpIcon />
+                                {{ props.post.reactions_count }} reactions
+                            </Button>
+                            <Button variant="outline">
+                                <MessageSquareText />
+                                {{ props.post.comments_count }} comments
+                            </Button>
+                        </ButtonGroup>
+                    </ButtonGroup>  
+                </CardFooter>
             </div>
+
             <hr />
+
             <div class="my-6">
                 <h2 class="text-xl font-semibold mb-2">Comments</h2>
                 <div class="p-4 w-full max-w-xl">
-                    <form  class="space-y-4">
+                    <form  @submit.prevent="handleSubmit" class="space-y-4">
                         <FieldGroup>
                             <Field>
                                 <FieldLabel htmlFor="block-end-textarea">Write your comment</FieldLabel>
@@ -103,6 +110,19 @@ const breadcrumbs: BreadcrumbItem[] = [
                             </Field>
                         </FieldGroup>
                     </form>
+                </div>
+
+                <!-- list the comments here, maybe in a card like the post, but smaller and without the footer. -->
+                <div class="space-y-4">
+                    <Card v-for="comment in props.post.comments" :key="comment.id" class="w-full max-w-xl">
+                        <CardHeader>
+                            <CardTitle>{{ comment.user.name }}</CardTitle>
+                            <CardDescription>{{ timeAgo(comment.created_at) }}</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <p>{{ comment.content }}</p>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </div>
