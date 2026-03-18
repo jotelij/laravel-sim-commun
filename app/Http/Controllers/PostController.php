@@ -22,7 +22,7 @@ class PostController extends Controller
         ->withQueryString();
 
         return Inertia::render('posts/Index', [
-            'posts' => $posts
+            'posts_data' => $posts
         ]);
     }
 
@@ -146,10 +146,14 @@ class PostController extends Controller
             abort(403);
         }
 
-        $posts = $user->posts()->with('user')->withCount('comments', 'reactions')->latest()->get();
+        $posts = $user->posts()->with('user')
+        ->withCount('comments', 'reactions')
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
         return Inertia::render('posts/MyIndex', [
-            'posts' => $posts
+            'posts_data' => $posts
         ]);
     }
 }

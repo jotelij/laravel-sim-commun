@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
-import { CheckCircle2Icon, ThumbsUpIcon, MessageSquareText  } from 'lucide-vue-next';
+import { Head, Link } from '@inertiajs/vue3';
+import { ThumbsUpIcon, MessageSquareText  } from 'lucide-vue-next';
 import AppLayout from '@/layouts/AppLayout.vue';
-import type { BreadcrumbItem } from '@/types';
+import type { BreadcrumbItem, Paginated } from '@/types';
 import posts from '@/routes/posts';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
@@ -10,8 +10,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Post } from '@/types/models';
 import { timeAgo } from '@/lib/utils';
 
+
 interface Props {
-    posts: Post[];
+    posts_data: Paginated<Post>;
 }
 
 const props = defineProps<Props>(); 
@@ -23,7 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const page = usePage();
+
 
 </script>
 
@@ -36,7 +37,7 @@ const page = usePage();
                 <Button>Create Post</Button>
             </Link>
             <div class="my-4 space-y-4">
-                <Card v-for="post in props.posts" :key="post.id" class="w-full max-w-xl">
+                <Card v-for="post in props.posts_data.data" :key="post.id" class="w-full max-w-xl">
                     <CardHeader>
                         <CardTitle>{{ post.user.name }}</CardTitle>
                         <CardDescription>{{ timeAgo(post.created_at) }}</CardDescription>
@@ -61,6 +62,23 @@ const page = usePage();
                         </ButtonGroup>  
                     </CardFooter>
                 </Card>
+            </div>
+
+            <div class="flex justify-center gap-1 p-3 border-t">
+                <!-- eslint-disable vue/no-v-html -->
+                <Link
+                    v-for="link in props.posts_data.links"
+                    :key="link.label"
+                    :href="link.url ?? '#'"
+                    preserve-scroll preserve-state
+                    v-html="link.label"
+                    class="px-3 py-1 text-sm rounded-md border border-border hover:bg-muted transition-colors"
+                    :class="{
+                        'bg-primary text-primary-foreground border-primary': link.active,
+                        'opacity-40 pointer-events-none': !link.url
+                    }"
+                />
+                <!--eslint-enable-->
             </div>
         </div>
     </AppLayout>

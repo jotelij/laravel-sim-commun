@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { Head, Link, usePage } from '@inertiajs/vue3';
-import { CheckCircle2Icon, ThumbsUpIcon, MessageSquareText  } from 'lucide-vue-next';
+import { Head, Link } from '@inertiajs/vue3';
+import { ThumbsUpIcon, MessageSquareText  } from 'lucide-vue-next';
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem, Paginated } from '@/types';
 import posts from '@/routes/posts';
 import { Button } from '@/components/ui/button';
 import { ButtonGroup } from '@/components/ui/button-group';
-import {Alert,AlertTitle} from '@/components/ui/alert';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Post } from '@/types/models';
 import { timeAgo } from '@/lib/utils';
 
 
 interface Props {
-    posts: Paginated<Post>;
+    posts_data: Paginated<Post>;
 }
 
 const props = defineProps<Props>(); 
@@ -24,8 +23,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: "/posts",
     },
 ];
-
-const page = usePage();
 
 </script>
 
@@ -46,7 +43,7 @@ const page = usePage();
                 <Button>Create Post</Button>
             </Link>
             <div class="flex-1 overflow-y-auto p-4 my-4 space-y-4">
-                <Card v-for="post in props.posts.data" :key="post.id" class="w-full max-w-xl">
+                <Card v-for="post in props.posts_data.data" :key="post.id" class="w-full max-w-xl">
                     <CardHeader>
                         <CardTitle>{{ post.user.name }}</CardTitle>
                         <CardDescription>{{ timeAgo(post.created_at) }}</CardDescription>
@@ -74,8 +71,9 @@ const page = usePage();
             </div>
 
             <div class="flex justify-center gap-1 p-3 border-t">
+                <!-- eslint-disable vue/no-v-html -->
                 <Link
-                    v-for="link in props.posts.links"
+                    v-for="link in props.posts_data.links"
                     :key="link.label"
                     :href="link.url ?? '#'"
                     preserve-scroll preserve-state
@@ -86,6 +84,7 @@ const page = usePage();
                         'opacity-40 pointer-events-none': !link.url
                     }"
                 />
+                <!--eslint-enable-->
             </div>
         </div>
     </AppLayout>
