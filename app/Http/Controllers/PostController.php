@@ -15,7 +15,11 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('user')->withCount('comments', 'reactions')->latest()->get();
+        $posts = Post::with('user')
+        ->withCount('comments', 'reactions')
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
 
         return Inertia::render('posts/Index', [
             'posts' => $posts
